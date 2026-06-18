@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hankerd.app — Tools Built for Real People</title>
+  <meta name="description" content="Practical web apps built by John Hankerd. Simple tools that solve real problems.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #0f0f0f;
+      --white: #ffffff;
+      --gray: #f5f5f3;
+      --text: #1a1a1a;
+      --text-muted: #666;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --border: #e5e5e3;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* NAV */
+    nav {
+      background: var(--black);
+      padding: 0 24px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-brand {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.3px;
+    }
+    .nav-brand span { color: #60a5fa; }
+    .nav-link {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-link:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+
+    /* HERO */
+    .hero {
+      background: var(--black);
+      padding: 80px 24px 90px;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #60a5fa;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: clamp(32px, 6vw, 58px);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 18px;
+      letter-spacing: -0.5px;
+    }
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      color: rgba(255,255,255,0.6);
+      max-width: 520px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(96,165,250,0.12);
+      border: 1px solid rgba(96,165,250,0.3);
+      color: #93c5fd;
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* APPS GRID */
+    .apps-section {
+      padding: 72px 24px;
+      background: var(--white);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: clamp(22px, 3vw, 28px);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 40px;
+    }
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .app-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      background: var(--white);
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+      display: flex;
+      flex-direction: column;
+    }
+    .app-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border-color: #c7d7f9;
+    }
+    .app-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .app-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .app-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      flex: 1;
+      margin-bottom: 20px;
+    }
+    .app-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .app-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .badge-free { background: #dcfce7; color: #166534; }
+    .badge-freemium { background: #dbeafe; color: #1e40af; }
+    .badge-pro { background: #fef3c7; color: #92400e; }
+    .app-link {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.15s;
+    }
+    .app-link:hover { gap: 8px; }
+    .app-link::after { content: '→'; }
+
+    .coming-soon {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .coming-soon .app-link::after { content: ''; }
+    .coming-soon .app-link { color: var(--text-muted); }
+
+    /* ABOUT BAND */
+    .about-band {
+      background: var(--gray);
+      padding: 60px 24px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .about-inner { max-width: 580px; margin: 0 auto; }
+    .about-title {
+      font-size: clamp(18px, 2.5vw, 22px);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .about-text {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--black);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.3);
+    }
+    footer a {
+      color: rgba(255,255,255,0.5);
+      transition: color 0.15s;
+    }
+    footer a:hover { color: var(--white); }
+
+    @media (max-width: 600px) {
+      .hero { padding: 56px 20px 64px; }
+      .apps-section { padding: 52px 20px; }
+      .apps-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">hankerd<span>.app</span></span>
+  <a href="mailto:john.hankerd@gmail.com" class="nav-link">Contact</a>
+</nav>
+
+<section class="hero">
+  <p class="hero-eyebrow">Built in Owosso, Michigan</p>
+  <h1 class="hero-title">Tools built for<br>real people.</h1>
+  <p class="hero-sub">Practical web apps that solve everyday problems. Free to try, simple to use, built by one guy who actually uses them.</p>
+  <span class="hero-badge">More apps launching soon</span>
+</section>
+
+<section class="apps-section">
+  <p class="section-label">The Apps</p>
+  <h2 class="section-title">What's available</h2>
+
+  <div class="apps-grid">
+
+    <div class="app-card">
+      <div class="app-icon" style="background:#fef3c7;">⭐</div>
+      <p class="app-name">All5Starz</p>
+      <p class="app-desc">Description coming soon.</p>
+      <div class="app-footer">
+        <span class="app-badge badge-freemium">Free + Pro</span>
+        <a href="/all5starz" class="app-link">Try it</a>
+      </div>
+    </div>
+
+    <div class="app-card">
+      <div class="app-icon" style="background:#dcfce7;">✅</div>
+      <p class="app-name">MarkItDone</p>
+      <p class="app-desc">Description coming soon.</p>
+      <div class="app-footer">
+        <span class="app-badge badge-freemium">Free + Pro</span>
+        <a href="/markitdone" class="app-link">Try it</a>
+      </div>
+    </div>
+
+    <div class="app-card">
+      <div class="app-icon" style="background:#dbeafe;">⏱️</div>
+      <p class="app-name">Time Study</p>
+      <p class="app-desc">Description coming soon.</p>
+      <div class="app-footer">
+        <span class="app-badge badge-freemium">Free + Pro</span>
+        <a href="/time-study" class="app-link">Try it</a>
+      </div>
+    </div>
+
+    <div class="app-card">
+      <div class="app-icon" style="background:#f3e8ff;">🏠</div>
+      <p class="app-name">Apartment Screener</p>
+      <p class="app-desc">Description coming soon.</p>
+      <div class="app-footer">
+        <span class="app-badge badge-free">Free</span>
+        <a href="/apartment-screener" class="app-link">Try it</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="about-band">
+  <div class="about-inner">
+    <p class="about-title">Built by someone who gets it.</p>
+    <p class="about-text">I'm John Hankerd — a realtor and small business owner in Owosso, Michigan. I build these tools because I needed them and couldn't find anything that wasn't overcomplicated or overpriced. If they work for me, they'll work for you.</p>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Hankerd.app · Owosso, Michigan · <a href="mailto:john.hankerd@gmail.com">john.hankerd@gmail.com</a></p>
+</footer>
+
+</body>
+</html>
