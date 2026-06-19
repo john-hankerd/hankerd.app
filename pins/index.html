@@ -292,18 +292,22 @@
   </div>
 </div>
 
-<!-- ── SCREEN 2A: COACH NAME ── -->
+<!-- ── SCREEN 2A: COACH SETUP ── -->
 <div id="coach-name-screen" class="auth-screen">
   <div class="login-emoji">🎽</div>
   <h1 class="login-title">Coach Setup</h1>
-  <p class="login-sub">Enter your name to create a team code.</p>
+  <p class="login-sub">Pick a code your team will remember.<br>They'll enter it to join your group.</p>
   <div class="login-card">
     <div>
       <div class="field-label">Your Name</div>
       <input id="coach-name-input" type="text" placeholder="Enter your name" autocomplete="given-name">
     </div>
+    <div>
+      <div class="field-label">Team Code (you choose)</div>
+      <input id="coach-code-input" type="text" placeholder="e.g. SOMI26 or MICHIGAN" autocomplete="off" maxlength="20">
+    </div>
     <p class="error-msg" id="coach-name-error" style="display:none"></p>
-    <button class="btn-gold" id="coach-name-btn">Create Team Code →</button>
+    <button class="btn-gold" id="coach-name-btn">See My Code →</button>
     <button class="btn-ghost" id="coach-back-btn">← Back</button>
   </div>
 </div>
@@ -515,14 +519,18 @@ $('member-back-btn').addEventListener('click', () => showScreen('role'));
 // ── Coach Name ──
 $('coach-name-btn').addEventListener('click', () => {
   const name = $('coach-name-input').value.trim();
+  const code = $('coach-code-input').value.trim().toUpperCase();
   if (!name) { showErr('coach-name-error', 'Enter your name.'); return; }
+  if (!code) { showErr('coach-name-error', 'Enter a team code.'); return; }
   user = name;
   role = 'coach';
-  tripCode = genCode();
+  tripCode = code;
   $('coach-code-display').textContent = tripCode;
   showScreen('coachCode');
 });
-$('coach-name-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('coach-name-btn').click(); });
+$('coach-name-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('coach-code-input').focus(); });
+$('coach-code-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+$('coach-code-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('coach-name-btn').click(); });
 
 // ── Copy Code ──
 $('copy-code-btn').addEventListener('click', () => {
