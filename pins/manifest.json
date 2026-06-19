@@ -1,0 +1,21 @@
+{
+  "name": "Pin Tracker — USA Games",
+  "short_name": "Pin Tracker",
+  "description": "Track your Special Olympics USA Games pin collection in real time.",
+  "start_url": "/pins/",
+  "display": "standalone",
+  "background_color": "#0f1118",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "/pins/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pins/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
