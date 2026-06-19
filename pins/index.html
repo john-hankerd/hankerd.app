@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pin Tracker — USA Games 2026</title>
+  <meta name="description" content="Track your Special Olympics USA Games pin collection in real time.">
+  <meta name="theme-color" content="#0f1118">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1118;
+      --surface: #1a1d27;
+      --surface2: #242838;
+      --text: #f0f0f0;
+      --muted: #888;
+      --gold: #f59e0b;
+      --gold-dark: #d97706;
+      --red: #ef4444;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+    .login-emoji { font-size: 52px; margin-bottom: 14px; }
+    .login-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .login-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .field-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 16px;
+      padding: 13px 16px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: var(--gold); }
+    input::placeholder { color: var(--muted); }
+    .btn-gold {
+      background: var(--gold);
+      color: #0f1118;
+      font-size: 15px;
+      font-weight: 800;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      width: 100%;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-gold:active { transform: scale(0.98); opacity: 0.9; }
+    .error-msg {
+      color: #f87171;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    /* ── MAIN ── */
+    #main-screen { display: none; flex-direction: column; min-height: 100vh; }
+
+    .top-bar {
+      background: var(--surface);
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .top-left-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .top-left-code { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .pin-counter { text-align: right; }
+    .pin-counter-num {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .pin-counter-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .progress-track { background: var(--surface2); height: 3px; }
+    .progress-fill { height: 3px; background: var(--gold); transition: width 0.4s; }
+
+    .grid-label {
+      padding: 14px 18px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+    }
+    .state-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      padding: 0 14px 40px;
+    }
+    .state-tile {
+      aspect-ratio: 1;
+      border-radius: 9px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .state-tile:active { transform: scale(0.92); }
+    .state-abbr {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 0.2px;
+    }
+    /* collected by 1 person */
+    .state-tile.got-one { background: var(--gold); border-color: var(--gold); }
+    .state-tile.got-one .state-abbr { color: #0f1118; }
+    /* collected by 2+ people */
+    .state-tile.got-multi { background: var(--gold-dark); border-color: var(--gold-dark); }
+    .state-tile.got-multi .state-abbr { color: #0f1118; }
+    /* collected by ME */
+    .state-tile.got-me::after {
+      content: '★';
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 8px;
+      color: #0f1118;
+      opacity: 0.7;
+    }
+    .count-badge {
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      font-size: 8px;
+      font-weight: 800;
+      color: #0f1118;
+      background: rgba(0,0,0,0.18);
+      border-radius: 3px;
+      padding: 0 3px;
+      line-height: 13px;
+    }
+
+    /* ── MODALS ── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 50;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .overlay.open { display: flex; }
+    .modal-sheet {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 28px 22px 44px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .modal-pill {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .modal-state-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .modal-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .collectors-list { margin-bottom: 22px; }
+    .collector-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      color: var(--text);
+    }
+    .collector-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+    .you-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gold);
+      background: rgba(245,158,11,0.12);
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+    .btn-row { display: flex; gap: 10px; }
+    .btn-cancel {
+      flex: 1;
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px;
+      cursor: pointer;
+    }
+    .btn-confirm {
+      flex: 2;
+      background: var(--gold);
+      color: #0f1118;
+      font-size: 14px;
+      font-weight: 800;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      cursor: pointer;
+    }
+    .limit-warn {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .already-mine {
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      color: #fde68a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-emoji">📍</div>
+  <h1 class="login-title">Pin Tracker</h1>
+  <p class="login-sub">Special Olympics Michigan<br>USA Games 2026</p>
+  <div class="login-card">
+    <div>
+      <div class="field-label">Your Name</div>
+      <input id="name-input" type="text" placeholder="Enter your name" autocomplete="given-name">
+    </div>
+    <div>
+      <div class="field-label">Trip Code</div>
+      <input id="code-input" type="text" placeholder="Ask John for the code" autocomplete="off">
+    </div>
+    <p class="error-msg" id="login-error" style="display:none"></p>
+    <button class="btn-gold" id="join-btn">Join Group →</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main-screen">
+  <div class="top-bar">
+    <div>
+      <div class="top-left-name" id="disp-name">—</div>
+      <div class="top-left-code" id="disp-code">—</div>
+    </div>
+    <div class="pin-counter">
+      <div class="pin-counter-num"><span id="pin-count">0</span>/50</div>
+      <div class="pin-counter-label">Pins</div>
+    </div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="grid-label">All 50 States</div>
+  <div class="state-grid" id="state-grid"></div>
+</div>
+
+<!-- COLLECT CONFIRM MODAL -->
+<div class="overlay" id="collect-modal">
+  <div class="modal-sheet">
+    <div class="modal-pill"></div>
+    <div class="modal-state-name" id="collect-state-name">—</div>
+    <div class="modal-sub" id="collect-sub">—</div>
+    <div class="limit-warn" id="collect-limit" style="display:none">
+      ⚠️ Your group is at 50 pins. Adding this goes over the limit.
+    </div>
+    <div class="btn-row">
+      <button class="btn-cancel" id="collect-cancel">Cancel</button>
+      <button class="btn-confirm" id="collect-ok">I got it! 📍</button>
+    </div>
+  </div>
+</div>
+
+<!-- INFO MODAL (state already collected) -->
+<div class="overlay" id="info-modal">
+  <div class="modal-sheet">
+    <div class="modal-pill"></div>
+    <div class="modal-state-name" id="info-state-name">—</div>
+    <div class="modal-sub">Collected by:</div>
+    <div class="collectors-list" id="collectors-list"></div>
+    <div class="already-mine" id="already-mine-msg" style="display:none">
+      ★ You already have this one!
+    </div>
+    <div class="limit-warn" id="info-limit" style="display:none">
+      ⚠️ Your group is at 50 pins. Adding this goes over the limit.
+    </div>
+    <div class="btn-row">
+      <button class="btn-cancel" id="info-close">Close</button>
+      <button class="btn-confirm" id="info-collect-too">I got one too! 📍</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, doc, onSnapshot, getDoc, setDoc, updateDoc, arrayUnion }
+                                from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ================================================================
+//  FIREBASE CONFIG — replace with yours from Firebase console
+// ================================================================
+const firebaseConfig = {
+  apiKey:            "AIzaSyCzUPrM6HnbMRVyoWLI8BZXwEQ_dtSN0hs",
+  authDomain:        "pintracker-ee495.firebaseapp.com",
+  projectId:         "pintracker-ee495",
+  storageBucket:     "pintracker-ee495.firebasestorage.app",
+  messagingSenderId: "958815866026",
+  appId:             "1:958815866026:web:86d24829a6bb1b753a94d3"
+};
+// ================================================================
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const STATES = [
+  {a:'AL',n:'Alabama'},{a:'AK',n:'Alaska'},{a:'AZ',n:'Arizona'},
+  {a:'AR',n:'Arkansas'},{a:'CA',n:'California'},{a:'CO',n:'Colorado'},
+  {a:'CT',n:'Connecticut'},{a:'DE',n:'Delaware'},{a:'FL',n:'Florida'},
+  {a:'GA',n:'Georgia'},{a:'HI',n:'Hawaii'},{a:'ID',n:'Idaho'},
+  {a:'IL',n:'Illinois'},{a:'IN',n:'Indiana'},{a:'IA',n:'Iowa'},
+  {a:'KS',n:'Kansas'},{a:'KY',n:'Kentucky'},{a:'LA',n:'Louisiana'},
+  {a:'ME',n:'Maine'},{a:'MD',n:'Maryland'},{a:'MA',n:'Massachusetts'},
+  {a:'MI',n:'Michigan'},{a:'MN',n:'Minnesota'},{a:'MS',n:'Mississippi'},
+  {a:'MO',n:'Missouri'},{a:'MT',n:'Montana'},{a:'NE',n:'Nebraska'},
+  {a:'NV',n:'Nevada'},{a:'NH',n:'New Hampshire'},{a:'NJ',n:'New Jersey'},
+  {a:'NM',n:'New Mexico'},{a:'NY',n:'New York'},{a:'NC',n:'North Carolina'},
+  {a:'ND',n:'North Dakota'},{a:'OH',n:'Ohio'},{a:'OK',n:'Oklahoma'},
+  {a:'OR',n:'Oregon'},{a:'PA',n:'Pennsylvania'},{a:'RI',n:'Rhode Island'},
+  {a:'SC',n:'South Carolina'},{a:'SD',n:'South Dakota'},{a:'TN',n:'Tennessee'},
+  {a:'TX',n:'Texas'},{a:'UT',n:'Utah'},{a:'VT',n:'Vermont'},
+  {a:'VA',n:'Virginia'},{a:'WA',n:'Washington'},{a:'WV',n:'West Virginia'},
+  {a:'WI',n:'Wisconsin'},{a:'WY',n:'Wyoming'}
+];
+
+const PIN_LIMIT = 50;
+let user = null, tripCode = null, pinsData = {}, selected = null, unsub = null;
+
+// ── DOM refs ──
+const $ = id => document.getElementById(id);
+const loginScreen   = $('login-screen');
+const mainScreen    = $('main-screen');
+const nameInput     = $('name-input');
+const codeInput     = $('code-input');
+const joinBtn       = $('join-btn');
+const loginError    = $('login-error');
+const dispName      = $('disp-name');
+const dispCode      = $('disp-code');
+const pinCount      = $('pin-count');
+const progressFill  = $('progress-fill');
+const stateGrid     = $('state-grid');
+const collectModal  = $('collect-modal');
+const collectName   = $('collect-state-name');
+const collectSub    = $('collect-sub');
+const collectLimit  = $('collect-limit');
+const collectCancel = $('collect-cancel');
+const collectOk     = $('collect-ok');
+const infoModal     = $('info-modal');
+const infoName      = $('info-state-name');
+const collList      = $('collectors-list');
+const alreadyMine   = $('already-mine-msg');
+const infoLimit     = $('info-limit');
+const infoClose     = $('info-close');
+const infoCollectToo= $('info-collect-too');
+
+// ── Init ──
+function init() {
+  const saved = localStorage.getItem('so_pins_user');
+  if (saved) {
+    ({ name: user, code: tripCode } = JSON.parse(saved));
+    showMain();
+  } else {
+    loginScreen.style.display = 'flex';
+  }
+}
+
+// ── Login ──
+joinBtn.addEventListener('click', () => {
+  const name = nameInput.value.trim();
+  const code = codeInput.value.trim().toUpperCase();
+  if (!name) { showErr('Enter your name.'); return; }
+  if (!code) { showErr('Enter the trip code.'); return; }
+  user = name; tripCode = code;
+  localStorage.setItem('so_pins_user', JSON.stringify({ name, code }));
+  loginError.style.display = 'none';
+  showMain();
+});
+nameInput.addEventListener('keydown', e => { if (e.key==='Enter') codeInput.focus(); });
+codeInput.addEventListener('input',   e => { e.target.value = e.target.value.toUpperCase(); });
+codeInput.addEventListener('keydown', e => { if (e.key==='Enter') joinBtn.click(); });
+function showErr(msg) { loginError.textContent = msg; loginError.style.display = 'block'; }
+
+// ── Main screen ──
+function showMain() {
+  loginScreen.style.display = 'none';
+  mainScreen.style.display  = 'flex';
+  mainScreen.style.flexDirection = 'column';
+  dispName.textContent = user;
+  dispCode.textContent = 'Trip: ' + tripCode;
+  buildGrid();
+  listenPins();
+}
+
+// ── Grid ──
+function buildGrid() {
+  stateGrid.innerHTML = '';
+  STATES.forEach(s => {
+    const tile = document.createElement('div');
+    tile.className = 'state-tile';
+    tile.id = 'tile-' + s.a;
+    tile.innerHTML = `<span class="state-abbr">${s.a}</span>`;
+    tile.addEventListener('click', () => onTap(s));
+    stateGrid.appendChild(tile);
+  });
+}
+
+function refreshGrid() {
+  let total = 0;
+  STATES.forEach(s => {
+    const tile = document.getElementById('tile-' + s.a);
+    if (!tile) return;
+    const collectors = pinsData[s.a] || [];
+    const count = collectors.length;
+    total += count;
+    // clear
+    const badge = tile.querySelector('.count-badge');
+    if (badge) badge.remove();
+    tile.className = 'state-tile';
+
+    if (count > 0) {
+      const isMine = collectors.some(c => c.name === user);
+      tile.classList.add(count === 1 ? 'got-one' : 'got-multi');
+      if (isMine) tile.classList.add('got-me');
+      if (count > 1) {
+        const b = document.createElement('span');
+        b.className = 'count-badge';
+        b.textContent = 'x' + count;
+        tile.appendChild(b);
+      }
+    }
+  });
+
+  const display = Math.min(total, PIN_LIMIT);
+  pinCount.textContent  = total;
+  progressFill.style.width = Math.min((total / PIN_LIMIT) * 100, 100) + '%';
+  if (total > PIN_LIMIT) pinCount.style.color = '#f87171';
+  else pinCount.style.color = 'var(--gold)';
+}
+
+// ── Firestore ──
+function listenPins() {
+  if (unsub) unsub();
+  unsub = onSnapshot(collection(db, 'trips', tripCode, 'pins'), snap => {
+    pinsData = {};
+    snap.forEach(d => { pinsData[d.id] = d.data().collectors || []; });
+    refreshGrid();
+  });
+}
+
+async function recordPin(abbr) {
+  const ref  = doc(db, 'trips', tripCode, 'pins', abbr);
+  const snap = await getDoc(ref);
+  const entry = { name: user, at: new Date().toISOString() };
+  if (snap.exists()) {
+    await updateDoc(ref, { collectors: arrayUnion(entry) });
+  } else {
+    await setDoc(ref, { collectors: [entry] });
+  }
+}
+
+// ── Tap handler ──
+function totalPins() {
+  return Object.values(pinsData).reduce((s, c) => s + c.length, 0);
+}
+
+function onTap(state) {
+  selected = state;
+  const collectors = pinsData[state.a] || [];
+  const iMineAlready = collectors.some(c => c.name === user);
+  const atLimit = totalPins() >= PIN_LIMIT;
+
+  if (collectors.length === 0) {
+    // Nobody has it yet
+    collectName.textContent = state.n;
+    collectSub.textContent  = 'Mark ' + state.n + ' as collected?';
+    collectLimit.style.display = atLimit ? 'block' : 'none';
+    collectModal.classList.add('open');
+  } else {
+    // Someone already has it — show info
+    infoName.textContent = '📍 ' + state.n;
+    collList.innerHTML   = '';
+    collectors.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'collector-row';
+      row.innerHTML = `<div class="collector-dot"></div><span>${c.name}</span>`;
+      if (c.name === user) {
+        const badge = document.createElement('span');
+        badge.className = 'you-badge';
+        badge.textContent = 'You';
+        row.appendChild(badge);
+      }
+      collList.appendChild(row);
+    });
+
+    alreadyMine.style.display     = iMineAlready ? 'block' : 'none';
+    infoLimit.style.display        = (!iMineAlready && atLimit) ? 'block' : 'none';
+    infoCollectToo.style.display   = iMineAlready ? 'none' : 'block';
+    infoModal.classList.add('open');
+  }
+}
+
+// ── Modal buttons ──
+collectOk.addEventListener('click', async () => {
+  if (!selected) return;
+  const s = selected;
+  collectModal.classList.remove('open');
+  selected = null;
+  await recordPin(s.a);
+});
+collectCancel.addEventListener('click', () => {
+  collectModal.classList.remove('open');
+  selected = null;
+});
+
+infoClose.addEventListener('click', () => {
+  infoModal.classList.remove('open');
+  selected = null;
+});
+infoCollectToo.addEventListener('click', () => {
+  infoModal.classList.remove('open');
+  if (!selected) return;
+  const s = selected;
+  const atLimit = totalPins() >= PIN_LIMIT;
+  collectName.textContent = s.n;
+  collectSub.textContent  = 'You're adding a second ' + s.n + ' pin. That's okay!';
+  collectLimit.style.display = atLimit ? 'block' : 'none';
+  collectModal.classList.add('open');
+});
+
+// close on overlay tap
+[collectModal, infoModal].forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+init();
+</script>
+</body>
+</html>
