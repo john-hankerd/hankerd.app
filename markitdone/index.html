@@ -2,20 +2,1846 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coming Soon — Hankerd.app</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>MarkItDone — Discipline, Tallied.</title>
+  <link rel="manifest" href="/markitdone/manifest.json">
+  <meta name="theme-color" content="#0F1E3D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MarkItDone">
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f0f; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; text-align: center; margin: 0; }
-    h1 { font-size: 28px; margin-bottom: 12px; }
-    p { color: rgba(255,255,255,0.5); margin-bottom: 24px; }
-    a { color: #60a5fa; font-size: 14px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0F1E3D;
+      --navy-light: #1a2f5e;
+      --emerald: #00D68F;
+      --emerald-dark: #00b377;
+      --white: #ffffff;
+      --gray-bg: #f8f9fa;
+      --gray-border: #e9ecef;
+      --text: #1a1a2e;
+      --text-muted: #6c757d;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; font-size: inherit; }
+    input, select { font-family: inherit; }
+
+    /* ── APP SHELL ── */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--white);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── VIEWS ── */
+    .view { display: none; flex-direction: column; min-height: 100vh; }
+    .view.active { display: flex; }
+
+    /* ── AUTH SCREENS ── */
+    .auth-screen {
+      background: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 52px 28px 40px;
+    }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 44px;
+    }
+    .auth-logo-icon {
+      width: 46px;
+      height: 46px;
+      background: var(--emerald);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .auth-logo-text { font-size: 20px; font-weight: 700; color: var(--white); }
+    .auth-logo-text span { color: var(--emerald); }
+    .auth-tagline {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 10px;
+    }
+    .auth-title { font-size: 30px; font-weight: 700; color: var(--white); line-height: 1.2; margin-bottom: 32px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-sm);
+      color: var(--white);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input::placeholder { color: rgba(255,255,255,0.25); }
+    .form-input:focus { border-color: var(--emerald); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      background: var(--emerald);
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+      letter-spacing: 0.2px;
+    }
+    .btn-primary:hover { background: var(--emerald-dark); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.45; pointer-events: none; }
+
+    .btn-navy {
+      width: 100%;
+      padding: 15px;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+    }
+    .btn-navy:hover { background: var(--navy-light); }
+    .btn-navy:active { transform: scale(0.98); }
+    .btn-navy:disabled { opacity: 0.45; pointer-events: none; }
+
+    .auth-switch { text-align: center; margin-top: 24px; font-size: 14px; color: rgba(255,255,255,0.45); }
+    .auth-switch a { color: var(--emerald); font-weight: 600; cursor: pointer; }
+
+    .error-msg {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    /* ── ONBOARDING ── */
+    .onboard-screen {
+      min-height: 100vh;
+      background: var(--white);
+      padding: 52px 24px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    .onboard-step { font-size: 12px; font-weight: 700; color: var(--emerald); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+    .onboard-title { font-size: 26px; font-weight: 700; color: var(--navy); margin-bottom: 8px; line-height: 1.2; }
+    .onboard-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; }
+
+    .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .category-card {
+      border: 2px solid var(--gray-border);
+      border-radius: var(--radius);
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .category-card:hover { border-color: #c7d7f9; }
+    .category-card.selected { border-color: var(--emerald); background: rgba(0,214,143,0.06); }
+    .category-card-icon { font-size: 34px; margin-bottom: 8px; display: block; }
+    .category-card-name { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .category-card-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+    .task-list-onboard { flex: 1; overflow-y: auto; margin-bottom: 12px; max-height: 340px; }
+    .task-section-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin: 18px 0 8px;
+    }
+    .task-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-border);
+      cursor: pointer;
+    }
+    .task-checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--gray-border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .task-option.selected .task-checkbox { background: var(--emerald); border-color: var(--emerald); }
+    .task-option.selected .task-checkbox::after { content: '✓'; }
+    .task-option-title { font-size: 15px; color: var(--text); flex: 1; }
+
+    .add-custom-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+    .custom-task-input {
+      flex: 1;
+      padding: 11px 14px;
+      border: 1.5px solid var(--gray-border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      outline: none;
+      color: var(--text);
+    }
+    .custom-task-input:focus { border-color: var(--emerald); }
+    .btn-add-custom {
+      padding: 11px 16px;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .btn-add-custom:hover { background: var(--navy-light); }
+
+    /* ── APP HEADER ── */
+    .app-header {
+      background: var(--navy);
+      padding: 18px 20px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .app-header-greeting { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 500; }
+    .app-header-name { font-size: 19px; font-weight: 700; color: var(--white); }
+    .app-header-points {
+      background: rgba(0,214,143,0.14);
+      border: 1px solid rgba(0,214,143,0.3);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--emerald);
+      white-space: nowrap;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { flex: 1; overflow-y: auto; padding-bottom: 80px; background: var(--white); }
+
+    /* ── TODAY ── */
+    .today-date-bar { padding: 14px 20px 4px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 14px 20px 6px;
+    }
+    .section-label.danger { color: #ef4444; }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--gray-border);
+      gap: 12px;
+      background: var(--white);
+      transition: background 0.1s;
+    }
+    .task-row.missed { background: #fff8f8; }
+    .task-row.completed { opacity: 0.5; }
+    .task-row.skipped { opacity: 0.4; }
+
+    .task-check-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2.5px solid var(--gray-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .task-check-btn:hover:not(:disabled) { border-color: var(--emerald); }
+    .task-row.completed .task-check-btn { background: var(--emerald); border-color: var(--emerald); }
+    .task-row.completed .task-check-btn::after { content: '✓'; }
+    .task-row.skipped .task-check-btn { background: var(--gray-border); border-color: var(--gray-border); }
+    .task-row.skipped .task-check-btn::after { content: '—'; color: var(--text-muted); font-size: 12px; }
+
+    .task-row-body { flex: 1; min-width: 0; }
+    .task-row-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .task-row.completed .task-row-title { text-decoration: line-through; color: var(--text-muted); }
+    .task-row-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+
+    .task-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+    .badge-daily { background: #dbeafe; color: #1e40af; }
+    .badge-scheduled { background: #f3e8ff; color: #7e22ce; }
+    .badge-deadline { background: #fef3c7; color: #92400e; }
+    .badge-coach { background: rgba(0,214,143,0.15); color: #00875a; }
+    .task-streak { font-size: 11px; color: var(--warning); font-weight: 600; }
+
+    .task-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .task-action-btn {
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-skip { background: var(--gray-bg); color: var(--text-muted); border: 1px solid var(--gray-border); }
+    .btn-skip:hover { background: #e9ecef; }
+    .btn-makeup { background: rgba(0,214,143,0.12); color: #00875a; border: 1px solid rgba(0,214,143,0.3); }
+    .btn-makeup:hover { background: rgba(0,214,143,0.2); }
+
+    .empty-state { text-align: center; padding: 52px 24px; }
+    .empty-icon { font-size: 52px; margin-bottom: 16px; display: block; }
+    .empty-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+    .empty-sub { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--white);
+      border-top: 1px solid var(--gray-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 8px 0 calc(env(safe-area-inset-bottom, 0px) + 4px);
+      z-index: 50;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 10px;
+      cursor: pointer;
+      opacity: 0.38;
+      transition: opacity 0.15s;
+      min-width: 52px;
+    }
+    .nav-item.active { opacity: 1; }
+    .nav-item-icon { font-size: 20px; line-height: 1; }
+    .nav-item-label { font-size: 10px; font-weight: 600; color: var(--navy); letter-spacing: 0.3px; }
+    .nav-add {
+      width: 50px;
+      height: 50px;
+      background: var(--navy);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-size: 26px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(15,30,61,0.35);
+      transition: transform 0.15s, background 0.15s;
+      flex-shrink: 0;
+      line-height: 1;
+      padding-bottom: 2px;
+    }
+    .nav-add:hover { transform: scale(1.06); background: var(--navy-light); }
+
+    /* ── ADD TASK MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-sheet {
+      background: var(--white);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
+      max-height: 88vh;
+      overflow-y: auto;
+    }
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--gray-border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+
+    .form-group-light { margin-bottom: 16px; }
+    .form-group-light label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
+    }
+    .form-input-light {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--gray-border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+      background: var(--white);
+    }
+    .form-input-light:focus { border-color: var(--emerald); }
+
+    .type-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .type-btn {
+      padding: 10px 6px;
+      border: 2px solid var(--gray-border);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .type-btn.selected { border-color: var(--navy); color: var(--navy); background: rgba(15,30,61,0.05); }
+
+    .day-selector { display: flex; gap: 6px; flex-wrap: wrap; }
+    .day-btn {
+      width: 37px;
+      height: 37px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-border);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .day-btn.selected { background: var(--navy); border-color: var(--navy); color: var(--white); }
+
+    /* ── PROGRESS ── */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 20px; }
+    .stat-card {
+      background: rgba(15,30,61,0.05);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .stat-value { font-size: 30px; font-weight: 700; color: var(--emerald); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+    .streak-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--gray-border);
+    }
+    .streak-name { font-size: 14px; font-weight: 500; color: var(--text); }
+    .streak-count { font-size: 15px; font-weight: 700; color: var(--warning); }
+
+    /* ── SUGGESTIONS ── */
+    .suggestion-category { padding: 16px 20px 4px; }
+    .suggestion-category-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .pills-row { display: flex; flex-wrap: wrap; gap: 0; }
+    .suggestion-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 13px;
+      border: 1.5px solid var(--gray-border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin: 0 6px 8px 0;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--white);
+    }
+    .suggestion-pill:hover { border-color: var(--emerald); color: #00875a; background: rgba(0,214,143,0.06); }
+    .suggestion-pill.added { border-color: var(--emerald); color: #00875a; background: rgba(0,214,143,0.08); }
+    .pill-check { display: none; }
+    .suggestion-pill.added .pill-check { display: inline; }
+    .suggestion-pill.added .pill-plus { display: none; }
+
+    /* ── SETTINGS ── */
+    .settings-section { padding: 20px 20px 0; }
+    .settings-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--gray-border);
+    }
+    .settings-row-label { font-size: 15px; color: var(--text); }
+    .settings-row-value { font-size: 14px; color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+    .btn-danger {
+      width: 100%;
+      padding: 13px;
+      background: #fee2e2;
+      color: var(--danger);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 14px;
+      transition: background 0.15s;
+    }
+    .btn-danger:hover { background: #fecaca; }
+
+    /* ── INSTALL BANNER ── */
+    .install-banner {
+      position: fixed;
+      bottom: 76px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 448px;
+      background: var(--navy);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-lg);
+      z-index: 80;
+    }
+    .install-banner.show { display: flex; }
+    .install-banner-icon { font-size: 24px; flex-shrink: 0; }
+    .install-banner-text { flex: 1; }
+    .install-banner-title { font-size: 13px; font-weight: 700; color: var(--white); }
+    .install-banner-sub { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+    .install-banner-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .install-btn {
+      padding: 7px 14px;
+      background: var(--emerald);
+      color: var(--navy);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .install-close { color: rgba(255,255,255,0.4); font-size: 18px; cursor: pointer; padding: 4px; line-height: 1; }
+    .install-nodisplay { font-size: 11px; color: rgba(255,255,255,0.35); cursor: pointer; text-decoration: underline; margin-top: 6px; text-align: center; display: block; }
+
+    /* ── SPINNER / TOAST ── */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(15,30,61,0.2);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+    .btn-primary .spinner { border-color: rgba(15,30,61,0.2); border-top-color: var(--navy); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--navy);
+      color: var(--white);
+      padding: 12px 22px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 300;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      white-space: nowrap;
+      box-shadow: var(--shadow-lg);
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── IOS INSTALL INSTRUCTIONS ── */
+    .ios-instructions {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .ios-instructions.show { display: flex; }
+    .ios-sheet {
+      background: var(--white);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 28px 28px 48px;
+      text-align: center;
+    }
+    .ios-sheet h3 { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+    .ios-step {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-border);
+      text-align: left;
+    }
+    .ios-step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .ios-step-text { font-size: 14px; color: var(--text); }
+    .ios-step-text strong { color: var(--navy); }
+    .btn-ios-close { margin-top: 20px; padding: 13px; background: var(--navy); color: var(--white); border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; width: 100%; }
+
+    @media (max-width: 380px) {
+      .category-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div>
-    <h1>Coming Soon</h1>
-    <p>This app is on its way.</p>
-    <a href="/">← Back to Hankerd.app</a>
+<div id="app">
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ═══════════════════════════════════════
+       LOGIN
+  ═══════════════════════════════════════ -->
+  <div class="view active" id="view-login">
+    <div class="auth-screen">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="4" y1="5" x2="4" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="9.5" y1="5" x2="9.5" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="15" y1="5" x2="15" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="20.5" y1="5" x2="20.5" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="2" y1="21" x2="23" y2="7" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="auth-logo-text">MarkIt<span>Done</span></span>
+      </div>
+      <p class="auth-tagline">Discipline, Tallied.</p>
+      <h1 class="auth-title">Welcome back.</h1>
+      <div class="error-msg" id="login-error"></div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="login-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
+      <p class="auth-switch">Don't have an account? <a onclick="showView('view-signup')">Sign up free</a></p>
+    </div>
   </div>
+
+  <!-- ═══════════════════════════════════════
+       SIGNUP
+  ═══════════════════════════════════════ -->
+  <div class="view" id="view-signup">
+    <div class="auth-screen">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="4" y1="5" x2="4" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="9.5" y1="5" x2="9.5" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="15" y1="5" x2="15" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="20.5" y1="5" x2="20.5" y2="23" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="2" y1="21" x2="23" y2="7" stroke="#0F1E3D" stroke-width="2.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="auth-logo-text">MarkIt<span>Done</span></span>
+      </div>
+      <p class="auth-tagline">Discipline, Tallied.</p>
+      <h1 class="auth-title">Create your account.</h1>
+      <div class="error-msg" id="signup-error"></div>
+      <div class="form-group">
+        <label class="form-label">Your First Name</label>
+        <input type="text" class="form-input" id="signup-name" placeholder="First name" autocomplete="given-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="signup-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="signup-password" placeholder="Min. 6 characters" autocomplete="new-password">
+      </div>
+      <button class="btn-primary" id="signup-btn" onclick="doSignup()">Create Account — It's Free</button>
+      <p class="auth-switch">Already have an account? <a onclick="showView('view-login')">Sign in</a></p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       ONBOARDING — CATEGORY PICKER
+  ═══════════════════════════════════════ -->
+  <div class="view" id="view-onboard-category">
+    <div class="onboard-screen">
+      <p class="onboard-step">Step 1 of 2</p>
+      <h2 class="onboard-title">What's your main focus?</h2>
+      <p class="onboard-sub">We'll suggest some starting disciplines. You can always add, remove, or create your own.</p>
+      <div class="category-grid" id="category-grid">
+        <div class="category-card" data-cat="work" onclick="selectCategory(this)">
+          <span class="category-card-icon">💼</span>
+          <div class="category-card-name">Work</div>
+          <div class="category-card-desc">Productivity &amp; career</div>
+        </div>
+        <div class="category-card" data-cat="personal" onclick="selectCategory(this)">
+          <span class="category-card-icon">🌱</span>
+          <div class="category-card-name">Personal</div>
+          <div class="category-card-desc">Life &amp; growth</div>
+        </div>
+        <div class="category-card" data-cat="fitness" onclick="selectCategory(this)">
+          <span class="category-card-icon">💪</span>
+          <div class="category-card-name">Fitness</div>
+          <div class="category-card-desc">Health &amp; movement</div>
+        </div>
+        <div class="category-card" data-cat="school" onclick="selectCategory(this)">
+          <span class="category-card-icon">📚</span>
+          <div class="category-card-name">School</div>
+          <div class="category-card-desc">Study &amp; learning</div>
+        </div>
+      </div>
+      <button class="btn-navy" id="category-next-btn" onclick="goToTaskPicker()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       ONBOARDING — TASK PICKER
+  ═══════════════════════════════════════ -->
+  <div class="view" id="view-onboard-tasks">
+    <div class="onboard-screen">
+      <p class="onboard-step">Step 2 of 2</p>
+      <h2 class="onboard-title">Pick your starting disciplines.</h2>
+      <p class="onboard-sub">Check what fits. Uncheck what doesn't. Add your own at the bottom.</p>
+      <div class="task-list-onboard" id="onboard-task-list"></div>
+      <div class="add-custom-row">
+        <input type="text" class="custom-task-input" id="custom-task-input" placeholder="Name your own discipline...">
+        <button class="btn-add-custom" onclick="addCustomOnboardTask()">+ Add</button>
+      </div>
+      <button class="btn-navy" id="finish-onboard-btn" onclick="finishOnboarding()" style="margin-top:16px;">Let's Go →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       TODAY
+  ═══════════════════════════════════════ -->
+  <div class="view" id="view-today">
+    <div class="app-header">
+      <div>
+        <div class="app-header-greeting" id="header-greeting">Good morning,</div>
+        <div class="app-header-name" id="header-name">—</div>
+      </div>
+      <div class="app-header-points" id="header-points">0 pts</div>
+    </div>
+    <div class="main-content">
+      <div class="today-date-bar" id="today-date"></div>
+      <div id="missed-section" style="display:none">
+        <div class="section-label danger">⚠ Missed Yesterday</div>
+        <div id="missed-list"></div>
+      </div>
+      <div class="section-label">Today's Disciplines</div>
+      <div id="today-list">
+        <div class="empty-state">
+          <span class="empty-icon">⏳</span>
+          <div class="empty-title">Loading...</div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav" id="nav-today">
+      <div class="nav-item active" onclick="switchTab('today')"><span class="nav-item-icon">☀️</span><span class="nav-item-label">Today</span></div>
+      <div class="nav-item" onclick="switchTab('progress')"><span class="nav-item-icon">📈</span><span class="nav-item-label">Progress</span></div>
+      <div class="nav-add" onclick="openAddTask()">+</div>
+      <div class="nav-item" onclick="switchTab('suggestions')"><span class="nav-item-icon">💡</span><span class="nav-item-label">Ideas</span></div>
+      <div class="nav-item" onclick="switchTab('settings')"><span class="nav-item-icon">⚙️</span><span class="nav-item-label">Settings</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       PROGRESS
+  ═══════════════════════════════════════ -->
+  <div class="view" id="view-progress">
+    <div class="app-header">
+      <div>
+        <div class="app-header-greeting">Your progress</div>
+        <div class="app-header-name">Stats</div>
+      </div>
+      <div class="app-header-points" id="progress-points">0 pts</div>
+    </div>
+    <div class="main-content">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Points</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-week">0</div><div class="stat-label">This Week</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-best-streak">0</div><div class="stat-label">Best Streak 🔥</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Done Today</div></div>
+      </div>
+      <div class="section-label" style="margin-top:8px">Active Streaks</div>
+      <div id="streak-list">
+        <div style="padding:16px 20px;font-size:14px;color:var(--text-muted)">Complete tasks daily to build streaks.</div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('today')"><span class="nav-item-icon">☀️</span><span class="nav-item-label">Today</span></div>
+      <div class="nav-item active" onclick="switchTab('progress')"><span class="nav-item-icon">📈</span><span class="nav-item-label">Progress</span></div>
+      <div class="nav-add" onclick="openAddTask()">+</div>
+      <div class="nav-item" onclick="switchTab('suggestions')"><span class="nav-item-icon">💡</span><span class="nav-item-label">Ideas</span></div>
+      <div class="nav-item" onclick="switchTab('settings')"><span class="nav-item-icon">⚙️</span><span class="nav-item-label">Settings</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SUGGESTIONS / IDEAS
+  ═══════════════════════════════════════ -->
+  <div class="view" id="view-suggestions">
+    <div class="app-header">
+      <div>
+        <div class="app-header-greeting">Browse &amp; add</div>
+        <div class="app-header-name">Discipline Ideas 💡</div>
+      </div>
+    </div>
+    <div class="main-content" id="suggestions-content"></div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('today')"><span class="nav-item-icon">☀️</span><span class="nav-item-label">Today</span></div>
+      <div class="nav-item" onclick="switchTab('progress')"><span class="nav-item-icon">📈</span><span class="nav-item-label">Progress</span></div>
+      <div class="nav-add" onclick="openAddTask()">+</div>
+      <div class="nav-item active" onclick="switchTab('suggestions')"><span class="nav-item-icon">💡</span><span class="nav-item-label">Ideas</span></div>
+      <div class="nav-item" onclick="switchTab('settings')"><span class="nav-item-icon">⚙️</span><span class="nav-item-label">Settings</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SETTINGS
+  ═══════════════════════════════════════ -->
+  <div class="view" id="view-settings">
+    <div class="app-header">
+      <div>
+        <div class="app-header-greeting">Manage your account</div>
+        <div class="app-header-name">Settings</div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="settings-section">
+        <div class="settings-label">Account</div>
+        <div class="settings-row"><span class="settings-row-label">Name</span><span class="settings-row-value" id="settings-name">—</span></div>
+        <div class="settings-row"><span class="settings-row-label">Email</span><span class="settings-row-value" id="settings-email">—</span></div>
+      </div>
+      <div class="settings-section" style="margin-top:24px">
+        <div class="settings-label">Team / Coach</div>
+        <div class="settings-row">
+          <span class="settings-row-label">Coach Code</span>
+          <span id="settings-team-code" style="font-size:14px;color:var(--text-muted)">Not joined</span>
+        </div>
+        <div id="join-team-row" style="padding:0 0 12px">
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <input type="text" id="coach-code-input" class="form-input-light" placeholder="Enter code" style="text-transform:uppercase;letter-spacing:2px;font-weight:600">
+            <button onclick="joinTeam()" style="padding:12px 16px;background:var(--navy);color:var(--white);border-radius:8px;font-size:14px;font-weight:700;white-space:nowrap">Join</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section" style="margin-top:24px">
+        <div class="settings-label">Add to Home Screen</div>
+        <div class="settings-row">
+          <span class="settings-row-label">Install as app</span>
+          <span style="font-size:13px;color:var(--emerald);font-weight:700;cursor:pointer" onclick="showInstallFromSettings()">Add →</span>
+        </div>
+      </div>
+      <div class="settings-section" style="margin-top:24px;padding-bottom:8px">
+        <button class="btn-danger" onclick="doSignOut()">Sign Out</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('today')"><span class="nav-item-icon">☀️</span><span class="nav-item-label">Today</span></div>
+      <div class="nav-item" onclick="switchTab('progress')"><span class="nav-item-icon">📈</span><span class="nav-item-label">Progress</span></div>
+      <div class="nav-add" onclick="openAddTask()">+</div>
+      <div class="nav-item" onclick="switchTab('suggestions')"><span class="nav-item-icon">💡</span><span class="nav-item-label">Ideas</span></div>
+      <div class="nav-item active" onclick="switchTab('settings')"><span class="nav-item-icon">⚙️</span><span class="nav-item-label">Settings</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       ADD TASK MODAL
+  ═══════════════════════════════════════ -->
+  <div class="modal-overlay" id="add-task-modal" onclick="closeAddTask(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Add a Discipline</div>
+      <div class="form-group-light">
+        <label>Name Your Discipline</label>
+        <input type="text" class="form-input-light" id="new-task-title" placeholder="e.g. Morning walk, Clear inbox...">
+      </div>
+      <div class="form-group-light">
+        <label>How often?</label>
+        <div class="type-selector">
+          <div class="type-btn selected" data-type="daily" onclick="selectType(this)">Every Day</div>
+          <div class="type-btn" data-type="scheduled" onclick="selectType(this)">Specific Days</div>
+          <div class="type-btn" data-type="deadline" onclick="selectType(this)">By a Date</div>
+        </div>
+      </div>
+      <div id="scheduled-days-section" style="display:none" class="form-group-light">
+        <label>Which days?</label>
+        <div class="day-selector">
+          <button class="day-btn" data-day="0">Su</button>
+          <button class="day-btn" data-day="1">Mo</button>
+          <button class="day-btn" data-day="2">Tu</button>
+          <button class="day-btn" data-day="3">We</button>
+          <button class="day-btn" data-day="4">Th</button>
+          <button class="day-btn" data-day="5">Fr</button>
+          <button class="day-btn" data-day="6">Sa</button>
+        </div>
+      </div>
+      <div id="deadline-section" style="display:none">
+        <div class="form-group-light">
+          <label>Due Date</label>
+          <input type="date" class="form-input-light" id="new-task-due">
+        </div>
+        <div class="form-group-light">
+          <label>Point Value (2–10)</label>
+          <input type="number" class="form-input-light" id="new-task-points" min="2" max="10" value="5">
+        </div>
+      </div>
+      <button class="btn-navy" onclick="saveNewTask()">Save Discipline</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       INSTALL BANNER
+  ═══════════════════════════════════════ -->
+  <div class="install-banner" id="install-banner">
+    <span class="install-banner-icon">📱</span>
+    <div class="install-banner-text">
+      <div class="install-banner-title">Add to your home screen</div>
+      <div class="install-banner-sub">No app store. Works like a real app.</div>
+    </div>
+    <div class="install-banner-actions">
+      <button class="install-btn" onclick="triggerInstall()">Add</button>
+      <span class="install-close" onclick="dismissBanner(false)">✕</span>
+    </div>
+  </div>
+  <span class="install-nodisplay" id="install-nodisplay" onclick="dismissBanner(true)" style="display:none;position:fixed;bottom:142px;left:50%;transform:translateX(-50%);z-index:81;color:rgba(255,255,255,0.5)">Don't show again</span>
+
+  <!-- ═══════════════════════════════════════
+       iOS INSTALL INSTRUCTIONS
+  ═══════════════════════════════════════ -->
+  <div class="ios-instructions" id="ios-instructions" onclick="closeIosInstructions(event)">
+    <div class="ios-sheet">
+      <h3>📱 Add to Your Home Screen</h3>
+      <div class="ios-step">
+        <div class="ios-step-num">1</div>
+        <div class="ios-step-text">Tap the <strong>Share button</strong> (the box with an arrow) at the bottom of Safari.</div>
+      </div>
+      <div class="ios-step">
+        <div class="ios-step-num">2</div>
+        <div class="ios-step-text">Scroll down and tap <strong>"Add to Home Screen"</strong>.</div>
+      </div>
+      <div class="ios-step">
+        <div class="ios-step-num">3</div>
+        <div class="ios-step-text">Tap <strong>Add</strong> in the top right corner.</div>
+      </div>
+      <button class="btn-ios-close" onclick="closeIosInstructions()">Got it!</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════
+//  FIREBASE
+// ═══════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey: "AIzaSyB3pX5EXsjsavNcchQt431L-YTRXA88qNs",
+  authDomain: "markitdone-27f82.firebaseapp.com",
+  projectId: "markitdone-27f82",
+  storageBucket: "markitdone-27f82.firebasestorage.app",
+  messagingSenderId: "136123472736",
+  appId: "1:136123472736:web:78fb03853bbc97a9359c05",
+  measurementId: "G-D7MZS203BZ"
+});
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let currentUser        = null;
+let userDoc            = null;
+let selectedCategory   = null;
+let onboardSelected    = new Set();
+let onboardCustom      = [];
+let currentTaskType    = 'daily';
+let selectedDays       = new Set();
+let deferredInstall    = null;
+
+// ═══════════════════════════════════════════════
+//  PREDEFINED TASKS BY CATEGORY
+// ═══════════════════════════════════════════════
+const PREDEFINED = {
+  work: [
+    'Daily planning — review priorities',
+    'Clear inbox / messages',
+    'Complete one important task',
+    'No-distraction focus block (60 min)',
+    'End-of-day wrap-up',
+    'Follow up on open items',
+    'Team check-in or stand-up',
+  ],
+  personal: [
+    'Morning routine',
+    'Read for 20 minutes',
+    'Journal entry',
+    'Drink enough water',
+    'Call a friend or family member',
+    'Tidy one area of your space',
+    'Evening wind-down',
+  ],
+  fitness: [
+    'Morning workout',
+    'Evening walk',
+    'Stretch or mobility work',
+    'Track your nutrition',
+    'Get 7–8 hours of sleep',
+    '10,000 steps',
+    'Hydration goal',
+  ],
+  school: [
+    'Review class notes',
+    'Complete today\'s homework',
+    'Read assigned material',
+    'Study for 30 minutes',
+    'Organize your planner',
+    'Ask one question today',
+    'Prep materials for tomorrow',
+  ],
+};
+
+// ═══════════════════════════════════════════════
+//  SUGGESTION LIBRARY
+// ═══════════════════════════════════════════════
+const SUGGESTIONS = {
+  '🏃 Health': ['Morning walk','Evening run','Stretch for 10 min','Drink 8 glasses of water','Take vitamins','Sleep by 10pm','No alcohol today','Meal prep'],
+  '🧘 Wellness': ['Meditate for 10 min','Gratitude journal','Deep breathing','Digital detox hour','Get outside','Unplug before bed','Positive affirmation','Cold shower'],
+  '📚 Learning': ['Read 20 pages','Educational podcast','Watch one tutorial','Practice a new skill','Learn 5 new words','Take notes on something new'],
+  '💼 Work': ['Clear your inbox','Write tomorrow\'s plan','One big task done','No social media before noon','Follow up on leads','Update your to-do list'],
+  '💰 Finance': ['Track today\'s spending','Review budget','Transfer to savings','No unnecessary purchases','Check investment account','Pay a bill'],
+  '❤️ Social': ['Call or text someone you care about','Random act of kindness','Compliment someone','Write a thank-you message','Check on a friend'],
+  '🎯 Goals': ['Work on your side project','Vision board check-in','One step toward a big goal','Review your goals list','30-day challenge task'],
+};
+
+// ═══════════════════════════════════════════════
+//  AUTH STATE LISTENER
+// ═══════════════════════════════════════════════
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    currentUser = user;
+    try {
+      const snap = await db.collection('users').doc(user.uid).get();
+      if (snap.exists) {
+        userDoc = snap.data();
+        if (userDoc.onboarded) {
+          initApp();
+        } else {
+          showView('view-onboard-category');
+        }
+      } else {
+        // doc missing — send to onboarding
+        showView('view-onboard-category');
+      }
+    } catch(e) {
+      console.error(e);
+      showView('view-login');
+    }
+  } else {
+    currentUser = null;
+    userDoc = null;
+    showView('view-login');
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  VIEW MANAGEMENT
+// ═══════════════════════════════════════════════
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════
+//  AUTH — LOGIN
+// ═══════════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const err   = document.getElementById('login-error');
+  const btn   = document.getElementById('login-btn');
+  err.classList.remove('show');
+  if (!email || !pass) { showError(err, 'Please fill in both fields.'); return; }
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    showError(err, friendlyError(e.code));
+    btn.innerHTML = 'Sign In';
+    btn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  AUTH — SIGNUP
+// ═══════════════════════════════════════════════
+async function doSignup() {
+  const name  = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass  = document.getElementById('signup-password').value;
+  const err   = document.getElementById('signup-error');
+  const btn   = document.getElementById('signup-btn');
+  err.classList.remove('show');
+  if (!name || !email || !pass) { showError(err, 'Please fill in all fields.'); return; }
+  if (pass.length < 6) { showError(err, 'Password must be at least 6 characters.'); return; }
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    await db.collection('users').doc(cred.user.uid).set({
+      uid: cred.user.uid,
+      email,
+      displayName: name,
+      category: null,
+      onboarded: false,
+      totalPoints: 0,
+      weeklyPoints: 0,
+      teamId: null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    showView('view-onboard-category');
+  } catch(e) {
+    showError(err, friendlyError(e.code));
+    btn.innerHTML = 'Create Account — It\'s Free';
+    btn.disabled = false;
+  }
+}
+
+async function doSignOut() {
+  if (!confirm('Sign out?')) return;
+  await auth.signOut();
+}
+
+function showError(el, msg) { el.textContent = msg; el.classList.add('show'); }
+function friendlyError(code) {
+  const map = {
+    'auth/user-not-found':'No account found with that email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/invalid-credential':'Email or password is incorrect.',
+    'auth/email-already-in-use':'That email is already registered.',
+    'auth/invalid-email':'Please enter a valid email address.',
+    'auth/too-many-requests':'Too many attempts. Try again in a few minutes.',
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+// ═══════════════════════════════════════════════
+//  ONBOARDING — CATEGORY
+// ═══════════════════════════════════════════════
+function selectCategory(el) {
+  document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedCategory = el.dataset.cat;
+  const btn = document.getElementById('category-next-btn');
+  btn.disabled = false;
+}
+
+function goToTaskPicker() {
+  if (!selectedCategory) return;
+  onboardSelected.clear();
+  onboardCustom = [];
+  const tasks = PREDEFINED[selectedCategory] || [];
+  const list  = document.getElementById('onboard-task-list');
+  list.innerHTML = '';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'task-section-header';
+  hdr.textContent = 'Suggested for you — uncheck anything that doesn\'t fit';
+  list.appendChild(hdr);
+
+  tasks.forEach(title => {
+    const row = document.createElement('div');
+    row.className = 'task-option selected';
+    row.innerHTML = `<div class="task-checkbox"></div><div class="task-option-title">${title}</div>`;
+    row.onclick = () => {
+      row.classList.toggle('selected');
+      if (row.classList.contains('selected')) onboardSelected.add(title);
+      else onboardSelected.delete(title);
+    };
+    onboardSelected.add(title);
+    list.appendChild(row);
+  });
+
+  showView('view-onboard-tasks');
+}
+
+function addCustomOnboardTask() {
+  const input = document.getElementById('custom-task-input');
+  const title = input.value.trim();
+  if (!title) return;
+  onboardCustom.push(title);
+  onboardSelected.add(title);
+
+  const list = document.getElementById('onboard-task-list');
+  if (onboardCustom.length === 1) {
+    const hdr = document.createElement('div');
+    hdr.className = 'task-section-header';
+    hdr.textContent = 'Your custom disciplines';
+    list.appendChild(hdr);
+  }
+  const row = document.createElement('div');
+  row.className = 'task-option selected';
+  row.innerHTML = `<div class="task-checkbox"></div><div class="task-option-title">${title}</div>`;
+  row.onclick = () => {
+    row.classList.toggle('selected');
+    if (row.classList.contains('selected')) onboardSelected.add(title);
+    else onboardSelected.delete(title);
+  };
+  list.appendChild(row);
+  input.value = '';
+  input.focus();
+}
+
+async function finishOnboarding() {
+  const btn = document.getElementById('finish-onboard-btn');
+  btn.textContent = 'Setting up...';
+  btn.disabled = true;
+
+  const batch = db.batch();
+  [...onboardSelected].forEach(title => {
+    const ref = db.collection('tasks').doc();
+    batch.set(ref, {
+      userId: currentUser.uid,
+      title,
+      type: 'daily',
+      scheduledDays: [],
+      dueDate: null,
+      pointValue: 1,
+      isPrivate: true,
+      teamId: null,
+      assignedBy: 'self',
+      category: selectedCategory,
+      active: true,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  });
+
+  const userRef = db.collection('users').doc(currentUser.uid);
+  batch.update(userRef, { category: selectedCategory, onboarded: true });
+  await batch.commit();
+  userDoc = { ...userDoc, category: selectedCategory, onboarded: true };
+  initApp();
+}
+
+// ═══════════════════════════════════════════════
+//  APP INIT
+// ═══════════════════════════════════════════════
+function initApp() {
+  const name = currentUser.displayName || 'there';
+  document.getElementById('header-name').textContent     = name;
+  document.getElementById('header-greeting').textContent = greeting();
+  document.getElementById('settings-name').textContent   = name;
+  document.getElementById('settings-email').textContent  = currentUser.email;
+  if (userDoc?.teamCode) {
+    document.getElementById('settings-team-code').textContent = userDoc.teamCode;
+    document.getElementById('join-team-row').style.display = 'none';
+  }
+  showView('view-today');
+  loadToday();
+  buildSuggestions();
+  setTimeout(checkInstallBanner, 3000);
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning,';
+  if (h < 17) return 'Good afternoon,';
+  return 'Good evening,';
+}
+
+// ═══════════════════════════════════════════════
+//  DATE HELPERS
+// ═══════════════════════════════════════════════
+function dateStr(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function yesterdayStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return dateStr(d);
+}
+
+// ═══════════════════════════════════════════════
+//  TODAY VIEW
+// ═══════════════════════════════════════════════
+async function loadToday() {
+  const today     = dateStr();
+  const yesterday = yesterdayStr();
+  const dow       = new Date().getDay();
+  const yDow      = new Date(new Date().setDate(new Date().getDate()-1)).getDay();
+
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+  // Load all active tasks
+  const tasksSnap = await db.collection('tasks')
+    .where('userId','==', currentUser.uid)
+    .where('active','==', true)
+    .get();
+  const allTasks = tasksSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  // Tasks due today
+  const dueTasks = allTasks.filter(t => {
+    if (t.type === 'daily') return true;
+    if (t.type === 'scheduled') return Array.isArray(t.scheduledDays) && t.scheduledDays.includes(dow);
+    if (t.type === 'deadline') return t.dueDate && t.dueDate >= today;
+    return false;
+  });
+
+  // Today's completions
+  const compSnap = await db.collection('completions')
+    .where('userId','==', currentUser.uid)
+    .where('completedDate','==', today)
+    .get();
+  const todayComps = {};
+  compSnap.docs.forEach(d => { const data = d.data(); todayComps[data.taskId] = { id: d.id, ...data }; });
+
+  // Missed yesterday
+  const yTaskIds = allTasks
+    .filter(t => t.type === 'daily' || (t.type === 'scheduled' && Array.isArray(t.scheduledDays) && t.scheduledDays.includes(yDow)))
+    .map(t => t.id);
+
+  const yCompSnap = await db.collection('completions')
+    .where('userId','==', currentUser.uid)
+    .where('completedDate','==', yesterday)
+    .get();
+  const yCompletedIds = new Set(yCompSnap.docs.map(d => d.data().taskId));
+  const missedTasks = allTasks.filter(t => yTaskIds.includes(t.id) && !yCompletedIds.has(t.id));
+
+  renderToday(dueTasks, todayComps);
+  renderMissed(missedTasks);
+  loadStats();
+}
+
+function renderToday(tasks, comps) {
+  const list = document.getElementById('today-list');
+  if (tasks.length === 0) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-icon">🎯</span><div class="empty-title">No tasks yet!</div><div class="empty-sub">Tap the + button to add your first discipline.</div></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  // Sort: incomplete first, then completed/skipped
+  const sorted = [...tasks].sort((a,b) => {
+    const ac = comps[a.id];
+    const bc = comps[b.id];
+    const adone = ac && !ac.skipped;
+    const bdone = bc && !bc.skipped;
+    return adone - bdone;
+  });
+  sorted.forEach(task => {
+    const comp        = comps[task.id];
+    const isCompleted = comp && !comp.skipped;
+    const isSkipped   = comp && comp.skipped;
+    const row = document.createElement('div');
+    row.className = 'task-row' + (isCompleted ? ' completed' : '') + (isSkipped ? ' skipped' : '');
+    row.id = 'row-' + task.id;
+
+    const typeBadge  = `<span class="task-badge badge-${task.type}">${task.type}</span>`;
+    const coachBadge = task.assignedBy === 'coach' ? `<span class="task-badge badge-coach">coach</span>` : '';
+
+    let actions = '';
+    if (!isCompleted && !isSkipped) {
+      actions = `<div class="task-row-actions"><button class="task-action-btn btn-skip" onclick="skipTask('${task.id}')">Skip</button></div>`;
+    }
+
+    row.innerHTML = `
+      <button class="task-check-btn" onclick="toggleTask('${task.id}',${isCompleted})" ${isSkipped?'disabled':''}></button>
+      <div class="task-row-body">
+        <div class="task-row-title">${escHtml(task.title)}</div>
+        <div class="task-row-meta">${typeBadge}${coachBadge}</div>
+      </div>
+      ${actions}`;
+    list.appendChild(row);
+  });
+}
+
+function renderMissed(tasks) {
+  const section = document.getElementById('missed-section');
+  const list    = document.getElementById('missed-list');
+  if (!tasks.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = '';
+  tasks.forEach(task => {
+    const row = document.createElement('div');
+    row.className = 'task-row missed';
+    row.id = 'missed-' + task.id;
+    row.innerHTML = `
+      <div class="task-row-body" style="flex:1">
+        <div class="task-row-title">${escHtml(task.title)}</div>
+        <div class="task-row-meta"><span class="task-badge badge-${task.type}">${task.type}</span><span style="font-size:11px;color:#ef4444;font-weight:600">Missed yesterday</span></div>
+      </div>
+      <div class="task-row-actions">
+        <button class="task-action-btn btn-makeup" onclick="makeUp('${task.id}',this)">Make Up</button>
+        <button class="task-action-btn btn-skip" onclick="skipMissed('${task.id}',this)">Skip</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+async function toggleTask(taskId, wasCompleted) {
+  const today = dateStr();
+  if (wasCompleted) {
+    const snap = await db.collection('completions')
+      .where('userId','==',currentUser.uid)
+      .where('taskId','==',taskId)
+      .where('completedDate','==',today)
+      .get();
+    const batch = db.batch();
+    snap.docs.forEach(d => batch.delete(d.ref));
+    batch.update(db.collection('users').doc(currentUser.uid), {
+      totalPoints: firebase.firestore.FieldValue.increment(-1),
+      weeklyPoints: firebase.firestore.FieldValue.increment(-1),
+    });
+    await batch.commit();
+  } else {
+    await db.collection('completions').add({
+      taskId, userId: currentUser.uid,
+      completedDate: today, scheduledDate: today,
+      onTime: true, skipped: false, pointsEarned: 1, madeUp: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    await db.collection('users').doc(currentUser.uid).update({
+      totalPoints: firebase.firestore.FieldValue.increment(1),
+      weeklyPoints: firebase.firestore.FieldValue.increment(1),
+    });
+    showToast('✅ +1 point!');
+  }
+  loadToday();
+}
+
+async function skipTask(taskId) {
+  await db.collection('completions').add({
+    taskId, userId: currentUser.uid,
+    completedDate: dateStr(), scheduledDate: dateStr(),
+    onTime: false, skipped: true, pointsEarned: 0, madeUp: false,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  showToast('Skipped for today');
+  loadToday();
+}
+
+async function makeUp(taskId, btn) {
+  await db.collection('completions').add({
+    taskId, userId: currentUser.uid,
+    completedDate: dateStr(), scheduledDate: yesterdayStr(),
+    onTime: false, skipped: false, pointsEarned: 0, madeUp: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  showToast('Made up — no points, streak resets 📋');
+  removeMissedRow(taskId);
+}
+
+function skipMissed(taskId, btn) {
+  showToast('Dismissed');
+  removeMissedRow(taskId);
+}
+
+function removeMissedRow(taskId) {
+  const row = document.getElementById('missed-' + taskId);
+  if (row) row.remove();
+  if (!document.getElementById('missed-list').children.length) {
+    document.getElementById('missed-section').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  STATS / PROGRESS
+// ═══════════════════════════════════════════════
+async function loadStats() {
+  const snap  = await db.collection('users').doc(currentUser.uid).get();
+  const data  = snap.data() || {};
+  const total = data.totalPoints || 0;
+  const week  = data.weeklyPoints || 0;
+
+  document.getElementById('header-points').textContent  = total + ' pts';
+  document.getElementById('progress-points').textContent = total + ' pts';
+  document.getElementById('stat-total').textContent     = total;
+  document.getElementById('stat-week').textContent      = week;
+
+  // Done today
+  const doneSnap = await db.collection('completions')
+    .where('userId','==',currentUser.uid)
+    .where('completedDate','==',dateStr())
+    .where('skipped','==',false)
+    .get();
+  document.getElementById('stat-done').textContent = doneSnap.size;
+
+  // Streaks — show tasks with 7+ day completions
+  await loadStreaks();
+}
+
+async function loadStreaks() {
+  const streakList = document.getElementById('streak-list');
+  // Get last 30 days of completions
+  const d30 = new Date(); d30.setDate(d30.getDate()-30);
+  const d30str = dateStr(d30);
+  const compSnap = await db.collection('completions')
+    .where('userId','==',currentUser.uid)
+    .where('completedDate','>=',d30str)
+    .where('skipped','==',false)
+    .get();
+
+  // Build streak map
+  const byTask = {};
+  compSnap.docs.forEach(d => {
+    const { taskId, completedDate } = d.data();
+    if (!byTask[taskId]) byTask[taskId] = new Set();
+    byTask[taskId].add(completedDate);
+  });
+
+  // Calc current streak per task
+  const taskSnap = await db.collection('tasks')
+    .where('userId','==',currentUser.uid)
+    .where('active','==',true)
+    .get();
+  const taskMap = {};
+  taskSnap.docs.forEach(d => { taskMap[d.id] = d.data().title; });
+
+  const streaks = [];
+  let bestStreak = 0;
+  Object.entries(byTask).forEach(([tid, dates]) => {
+    let streak = 0;
+    const d = new Date();
+    while (true) {
+      const s = dateStr(d);
+      if (dates.has(s)) { streak++; d.setDate(d.getDate()-1); }
+      else break;
+    }
+    if (streak > 0 && taskMap[tid]) {
+      streaks.push({ title: taskMap[tid], streak });
+    }
+    if (streak > bestStreak) bestStreak = streak;
+  });
+
+  document.getElementById('stat-best-streak').textContent = bestStreak;
+  streaks.sort((a,b) => b.streak - a.streak);
+  if (streaks.length === 0) {
+    streakList.innerHTML = '<div style="padding:16px 20px;font-size:14px;color:var(--text-muted)">Complete tasks daily to build streaks.</div>';
+    return;
+  }
+  streakList.innerHTML = '';
+  streaks.forEach(({ title, streak }) => {
+    const row = document.createElement('div');
+    row.className = 'streak-row';
+    row.innerHTML = `<span class="streak-name">${escHtml(title)}</span><span class="streak-count">🔥 ${streak} day${streak!==1?'s':''}</span>`;
+    streakList.appendChild(row);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  ADD TASK MODAL
+// ═══════════════════════════════════════════════
+function openAddTask() {
+  document.getElementById('add-task-modal').classList.add('show');
+  setTimeout(() => document.getElementById('new-task-title').focus(), 100);
+}
+function closeAddTask(e) {
+  if (e && e.target !== document.getElementById('add-task-modal')) return;
+  document.getElementById('add-task-modal').classList.remove('show');
+}
+
+function selectType(el) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  currentTaskType = el.dataset.type;
+  document.getElementById('scheduled-days-section').style.display = currentTaskType==='scheduled' ? 'block' : 'none';
+  document.getElementById('deadline-section').style.display        = currentTaskType==='deadline'  ? 'block' : 'none';
+}
+
+document.querySelectorAll('.day-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const day = parseInt(btn.dataset.day);
+    btn.classList.toggle('selected');
+    if (btn.classList.contains('selected')) selectedDays.add(day);
+    else selectedDays.delete(day);
+  });
+});
+
+async function saveNewTask() {
+  const title = document.getElementById('new-task-title').value.trim();
+  if (!title) { showToast('Please name your discipline first.'); return; }
+  await db.collection('tasks').add({
+    userId: currentUser.uid,
+    title,
+    type: currentTaskType,
+    scheduledDays: currentTaskType==='scheduled' ? [...selectedDays] : [],
+    dueDate: currentTaskType==='deadline' ? (document.getElementById('new-task-due').value||null) : null,
+    pointValue: currentTaskType==='deadline' ? (parseInt(document.getElementById('new-task-points').value)||5) : 1,
+    isPrivate: true,
+    teamId: null,
+    assignedBy: 'self',
+    category: userDoc?.category || 'personal',
+    active: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  document.getElementById('add-task-modal').classList.remove('show');
+  document.getElementById('new-task-title').value = '';
+  showToast('Discipline added! 🎯');
+  loadToday();
+}
+
+// ═══════════════════════════════════════════════
+//  SUGGESTIONS
+// ═══════════════════════════════════════════════
+function buildSuggestions() {
+  const container = document.getElementById('suggestions-content');
+  container.innerHTML = '';
+  Object.entries(SUGGESTIONS).forEach(([cat, items]) => {
+    const section = document.createElement('div');
+    section.className = 'suggestion-category';
+    const label = document.createElement('div');
+    label.className = 'suggestion-category-label';
+    label.textContent = cat;
+    const pills = document.createElement('div');
+    pills.className = 'pills-row';
+    items.forEach(item => {
+      const pill = document.createElement('button');
+      pill.className = 'suggestion-pill';
+      pill.innerHTML = `<span class="pill-plus">+</span><span class="pill-check">✓</span> ${escHtml(item)}`;
+      pill.onclick = async () => {
+        if (pill.classList.contains('added')) return;
+        await db.collection('tasks').add({
+          userId: currentUser.uid,
+          title: item,
+          type: 'daily',
+          scheduledDays: [], dueDate: null,
+          pointValue: 1, isPrivate: true, teamId: null,
+          assignedBy: 'self', category: 'personal', active: true,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        pill.classList.add('added');
+        showToast('Added to Today! ✅');
+        loadToday();
+      };
+      pills.appendChild(pill);
+    });
+    section.appendChild(label);
+    section.appendChild(pills);
+    container.appendChild(section);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  SETTINGS — JOIN TEAM
+// ═══════════════════════════════════════════════
+async function joinTeam() {
+  const code = (document.getElementById('coach-code-input').value||'').trim().toUpperCase();
+  if (!code) return;
+  const snap = await db.collection('teams').where('code','==',code).get();
+  if (snap.empty) { showToast('Code not found. Check with your coach.'); return; }
+  const team = snap.docs[0];
+  await db.collection('users').doc(currentUser.uid).update({ teamId: team.id, teamCode: code });
+  document.getElementById('settings-team-code').textContent = code;
+  document.getElementById('join-team-row').style.display = 'none';
+  showToast('Joined team! 🎉');
+}
+
+// ═══════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════
+function switchTab(tab) {
+  const map = { today:'view-today', progress:'view-progress', suggestions:'view-suggestions', settings:'view-settings' };
+  showView(map[tab]);
+  if (tab === 'today')       loadToday();
+  if (tab === 'progress')    loadStats();
+}
+
+// ═══════════════════════════════════════════════
+//  INSTALL / ADD TO HOME SCREEN
+// ═══════════════════════════════════════════════
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+});
+
+function isIos() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+}
+
+function checkInstallBanner() {
+  if (localStorage.getItem('installDismissed') === 'forever') return;
+  if (window.navigator.standalone) return; // already installed
+  if (window.matchMedia('(display-mode: standalone)').matches) return; // installed on Android
+  const banner    = document.getElementById('install-banner');
+  const noDisplay = document.getElementById('install-nodisplay');
+  banner.classList.add('show');
+  noDisplay.style.display = 'block';
+}
+
+function triggerInstall() {
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(r => {
+      if (r.outcome === 'accepted') dismissBanner(true);
+    });
+  } else if (isIos()) {
+    document.getElementById('ios-instructions').classList.add('show');
+    dismissBanner(false);
+  } else {
+    showToast('Open in Chrome or Safari and use your browser\'s menu to install.');
+    dismissBanner(false);
+  }
+}
+
+function dismissBanner(forever) {
+  document.getElementById('install-banner').classList.remove('show');
+  document.getElementById('install-nodisplay').style.display = 'none';
+  if (forever) localStorage.setItem('installDismissed','forever');
+}
+
+function showInstallFromSettings() {
+  if (deferredInstall) { triggerInstall(); }
+  else if (isIos()) { document.getElementById('ios-instructions').classList.add('show'); }
+  else { showToast('Open in Chrome or Safari and use your browser\'s menu to install.'); }
+}
+
+function closeIosInstructions(e) {
+  if (!e || e.target === document.getElementById('ios-instructions')) {
+    document.getElementById('ios-instructions').classList.remove('show');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ═══════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Keyboard shortcuts
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('custom-task-input').addEventListener('keydown', e => { if(e.key==='Enter') addCustomOnboardTask(); });
+document.getElementById('new-task-title').addEventListener('keydown', e => { if(e.key==='Enter') saveNewTask(); });
+</script>
 </body>
 </html>
