@@ -727,7 +727,21 @@
         <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
       </div>
       <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:rgba(255,255,255,0.4)">
+        <a onclick="showForgotPassword()" style="color:rgba(255,255,255,0.5);cursor:pointer;text-decoration:underline;">Forgot your password?</a>
+      </p>
       <p class="auth-switch">Don't have an account? <a onclick="showView('view-signup')">Sign up free</a></p>
+
+      <!-- Forgot Password panel (hidden by default) -->
+      <div id="forgot-panel" style="display:none;margin-top:20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:18px;">
+        <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:12px;line-height:1.5;">Enter your email and we'll send you a reset link.</p>
+        <div id="forgot-success" style="display:none;background:rgba(0,214,143,0.15);border:1px solid rgba(0,214,143,0.3);color:#6ee7b7;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:10px;">Check your inbox — reset link sent!</div>
+        <div id="forgot-error" style="display:none;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input type="email" id="forgot-email" placeholder="your@email.com" style="flex:1;padding:11px 14px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:14px;outline:none;" onfocus="this.style.borderColor='#00D68F'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          <button onclick="sendReset()" id="reset-btn" style="padding:11px 16px;background:#00D68F;color:#0F1E3D;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;">Send Link</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1835,6 +1849,46 @@ function showToast(msg) {
 // ═══════════════════════════════════════════════
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════
+//  FORGOT PASSWORD
+// ═══════════════════════════════════════════════
+function showForgotPassword() {
+  const panel = document.getElementById('forgot-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') {
+    // Pre-fill with whatever email they already typed
+    const email = document.getElementById('login-email').value.trim();
+    if (email) document.getElementById('forgot-email').value = email;
+    document.getElementById('forgot-email').focus();
+    document.getElementById('forgot-success').style.display = 'none';
+    document.getElementById('forgot-error').style.display = 'none';
+  }
+}
+
+async function sendReset() {
+  const email   = document.getElementById('forgot-email').value.trim();
+  const success = document.getElementById('forgot-success');
+  const errEl   = document.getElementById('forgot-error');
+  const btn     = document.getElementById('reset-btn');
+  success.style.display = 'none';
+  errEl.style.display   = 'none';
+  if (!email) { errEl.textContent = 'Please enter your email.'; errEl.style.display = 'block'; return; }
+  btn.textContent = '...';
+  btn.disabled = true;
+  try {
+    await auth.sendPasswordResetEmail(email);
+    success.style.display = 'block';
+    btn.textContent = 'Sent!';
+  } catch(e) {
+    errEl.textContent = e.code === 'auth/user-not-found'
+      ? 'No account found with that email.'
+      : 'Something went wrong. Try again.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Send Link';
+    btn.disabled = false;
+  }
 }
 
 // Keyboard shortcuts
